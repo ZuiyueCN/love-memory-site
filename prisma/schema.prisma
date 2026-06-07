@@ -1,0 +1,114 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Photo {
+  id          String   @id @default(cuid())
+  title       String
+  description String?
+  imageUrl    String
+  storagePath String?
+  takenAt     DateTime
+  location    String?
+  category    String   @default("日常")
+  isFeatured  Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  timelineEvents TimelineEvent[]
+  memoryNotes    MemoryNote[]
+  comments       PhotoComment[]
+
+  @@index([takenAt])
+  @@index([isFeatured])
+}
+
+model PhotoComment {
+  id        String   @id @default(cuid())
+  author    String
+  body      String
+  photoId   String
+  photo     Photo    @relation(fields: [photoId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@index([photoId])
+  @@index([createdAt])
+}
+
+model MomentPost {
+  id        String        @id @default(cuid())
+  title     String
+  body      String
+  postedAt  DateTime
+  location  String?
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
+  photos    MomentPhoto[]
+
+  @@index([postedAt])
+}
+
+model MomentPhoto {
+  id          String     @id @default(cuid())
+  imageUrl    String
+  storagePath String?
+  order       Int        @default(0)
+  postId      String
+  post        MomentPost @relation(fields: [postId], references: [id], onDelete: Cascade)
+  createdAt   DateTime   @default(now())
+
+  @@index([postId])
+  @@index([order])
+}
+
+model GuestbookMessage {
+  id        String   @id @default(cuid())
+  author    String
+  body      String
+  isPinned  Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  @@index([createdAt])
+  @@index([isPinned])
+}
+
+model TimelineEvent {
+  id        String   @id @default(cuid())
+  title     String
+  body      String
+  happenedAt DateTime
+  order     Int      @default(0)
+  photoId   String?
+  photo     Photo?   @relation(fields: [photoId], references: [id], onDelete: SetNull)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([happenedAt])
+  @@index([order])
+}
+
+model MemoryNote {
+  id        String   @id @default(cuid())
+  title     String
+  body      String
+  notedAt   DateTime
+  coverId   String?
+  cover     Photo?   @relation(fields: [coverId], references: [id], onDelete: SetNull)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([notedAt])
+}
+
+model AdminUser {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  passwordHash String
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
