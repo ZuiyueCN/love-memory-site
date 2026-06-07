@@ -38,6 +38,7 @@ SUPABASE_STORAGE_BUCKET="love-photos"
 ADMIN_EMAIL="你的主人邮箱"
 ADMIN_INITIAL_PASSWORD="你的初始密码"
 SESSION_SECRET="至少 32 位随机字符串"
+AUTH_COOKIE_SECURE="本地或 HTTP 公网 IP 填 false，HTTPS 域名填 true"
 ```
 
 4. 在 Supabase Storage 创建公开 bucket，名称与 `SUPABASE_STORAGE_BUCKET` 保持一致，默认是 `love-photos`。
@@ -97,6 +98,7 @@ SUPABASE_STORAGE_BUCKET="love-photos"
 ADMIN_EMAIL="你的主人邮箱"
 ADMIN_INITIAL_PASSWORD="你的初始密码"
 SESSION_SECRET="至少 32 位随机字符串"
+AUTH_COOKIE_SECURE="本地或 HTTP 公网 IP 填 false，HTTPS 域名填 true"
 ```
 
 Vercel 构建设置保持默认即可：

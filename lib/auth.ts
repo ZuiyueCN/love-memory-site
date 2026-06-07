@@ -8,6 +8,14 @@ import { requireEnv } from "@/lib/env";
 const sessionCookieName = "love_admin_session";
 const sessionMaxAge = 60 * 60 * 24 * 7;
 
+function shouldUseSecureCookie() {
+  if (process.env.AUTH_COOKIE_SECURE) {
+    return process.env.AUTH_COOKIE_SECURE === "true";
+  }
+
+  return process.env.NODE_ENV === "production" && process.env.VERCEL === "1";
+}
+
 async function signSession(email: string, expiresAt: number) {
   const secret = requireEnv("SESSION_SECRET");
   const payload = `${email}.${expiresAt}`;
@@ -93,7 +101,7 @@ export async function loginAdmin(email: string, password: string) {
   cookieStore.set(sessionCookieName, token, {
     httpOnly: true,
     sameSite: "lax",
-    secure: process.env.NODE_ENV === "production",
+    secure: shouldUseSecureCookie(),
     path: "/",
     maxAge: sessionMaxAge
   });
