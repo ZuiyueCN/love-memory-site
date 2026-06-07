@@ -6,7 +6,7 @@
 
 1. 在 Supabase 创建或确认 Postgres 数据库。
 2. 在 Supabase Storage 创建公开 bucket，名称与 `SUPABASE_STORAGE_BUCKET` 保持一致，默认是 `love-photos`。
-3. 当前 V1 会在浏览器端自动压缩大图，单张图片保存前限制为 4MB。阿里云服务器部署时建议把 Nginx `client_max_body_size` 设为 `50M`，方便组图上传。
+3. 当前 V1 会在浏览器端把照片统一转成普通 JPG，避免 HDR 照片导致页面闪烁；单张图片保存前限制为 4MB。阿里云服务器部署时建议把 Nginx `client_max_body_size` 设为 `50M`，方便组图上传。
 4. 确认本地生产构建通过：
 
 ```bash

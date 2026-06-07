@@ -85,7 +85,7 @@ npm run dev
 - Supabase Postgres 已经执行过 Prisma migration。
 - Supabase Storage 已创建公开 bucket，名称与 `SUPABASE_STORAGE_BUCKET` 一致。
 - 本地执行 `npm run build` 可以通过。
-- 当前 V1 会在浏览器端自动压缩大图，单张图片保存前限制为 4MB；阿里云服务器部署时建议把 Nginx `client_max_body_size` 设为 `50M`，方便组图上传。
+- 当前 V1 会在浏览器端把照片统一转成普通 JPG，避免 HDR 照片导致页面闪烁；单张图片保存前限制为 4MB。阿里云服务器部署时建议把 Nginx `client_max_body_size` 设为 `50M`，方便组图上传。
 - `.env` 不要上传到公开仓库，线上只在 Vercel 的 Environment Variables 里填写。
 
 Vercel 环境变量需要填写：

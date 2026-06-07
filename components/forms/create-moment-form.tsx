@@ -45,7 +45,7 @@ export function CreateMomentForm() {
       }
 
       input.files = transfer.files;
-      setCompressionMessage(compressedTotalSize < originalTotalSize ? "组图已自动压缩，正在上传..." : "图片大小合适，正在上传...");
+      setCompressionMessage(compressedTotalSize < originalTotalSize ? "组图已自动压缩并转成普通 JPG，正在上传..." : "组图已转成普通 JPG，正在上传...");
       form.dataset.compressed = "true";
       setIsCompressing(false);
       requestAnimationFrame(() => {
@@ -74,7 +74,7 @@ export function CreateMomentForm() {
             multiple
             required
           />
-          <span className="mt-2 block text-xs font-bold text-rosewood/60">最多 9 张，大图会在上传前自动压缩到每张 4MB 以内。发布后会同步保存到相册的“动态”分类。</span>
+          <span className="mt-2 block text-xs font-bold text-rosewood/60">最多 9 张，照片会在上传前自动转成普通 JPG，大图会压缩到每张 4MB 以内，避免 HDR 闪烁。</span>
         </label>
         <label className="block">
           <span className="mb-2 block text-sm font-bold text-rosewood">标题</span>

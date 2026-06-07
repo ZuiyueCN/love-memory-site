@@ -41,7 +41,7 @@ export function CreatePhotoForm() {
       transfer.items.add(compressedFile);
       input.files = transfer.files;
 
-      setCompressionMessage(compressedFile.size < originalSize ? "图片已自动压缩，正在上传..." : "图片大小合适，正在上传...");
+      setCompressionMessage(compressedFile.size < originalSize ? "图片已自动压缩并转成普通 JPG，正在上传..." : "图片已转成普通 JPG，正在上传...");
       form.dataset.compressed = "true";
       setIsCompressing(false);
       requestAnimationFrame(() => {
@@ -63,7 +63,7 @@ export function CreatePhotoForm() {
         <label className="block sm:col-span-2">
           <span className="mb-2 block text-sm font-bold text-rosewood">照片文件</span>
           <input className="field file:mr-3 file:rounded-full file:border-0 file:bg-blush/25 file:px-4 file:py-2 file:text-sm file:font-bold file:text-rosewood" type="file" name="photo" accept="image/*" required />
-          <span className="mt-2 block text-xs font-bold text-rosewood/60">大图会在上传前自动压缩到 4MB 以内。</span>
+          <span className="mt-2 block text-xs font-bold text-rosewood/60">照片会在上传前自动转成普通 JPG，大图会压缩到 4MB 以内，避免 HDR 闪烁。</span>
         </label>
         <label className="block">
           <span className="mb-2 block text-sm font-bold text-rosewood">标题</span>

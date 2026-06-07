@@ -43,7 +43,7 @@ function jpegName(fileName: string) {
 }
 
 export async function compressImageFile(file: File) {
-  if (!file.type.startsWith("image/") || file.size <= maxCompressedImageSize) {
+  if (!file.type.startsWith("image/")) {
     return file;
   }
 
