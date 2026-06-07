@@ -1,8 +1,9 @@
 "use client";
 
-import { useActionState } from "react";
+import { type FormEvent, useActionState, useState } from "react";
 import { ImagePlus } from "lucide-react";
 import { createPhotoAction } from "@/app/actions";
+import { compressImageFile } from "@/components/forms/image-compression";
 import { SubmitButton } from "@/components/forms/submit-button";
 
 const initialState = {
@@ -12,9 +13,48 @@ const initialState = {
 
 export function CreatePhotoForm() {
   const [state, action] = useActionState(createPhotoAction, initialState);
+  const [compressionMessage, setCompressionMessage] = useState("");
+  const [isCompressing, setIsCompressing] = useState(false);
+
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
+    const form = event.currentTarget;
+
+    if (form.dataset.compressed === "true") {
+      delete form.dataset.compressed;
+      return;
+    }
+
+    event.preventDefault();
+    const input = form.elements.namedItem("photo");
+
+    if (!(input instanceof HTMLInputElement) || !input.files?.[0]) {
+      return;
+    }
+
+    setCompressionMessage("正在压缩图片，请稍等...");
+    setIsCompressing(true);
+
+    try {
+      const originalSize = input.files[0].size;
+      const compressedFile = await compressImageFile(input.files[0]);
+      const transfer = new DataTransfer();
+      transfer.items.add(compressedFile);
+      input.files = transfer.files;
+
+      setCompressionMessage(compressedFile.size < originalSize ? "图片已自动压缩，正在上传..." : "图片大小合适，正在上传...");
+      form.dataset.compressed = "true";
+      setIsCompressing(false);
+      requestAnimationFrame(() => {
+        form.requestSubmit();
+      });
+    } catch (error) {
+      setCompressionMessage(error instanceof Error ? error.message : "图片压缩失败，请换一张照片再试。");
+      setIsCompressing(false);
+    }
+  }
 
   return (
-    <form action={action} className="soft-card rounded-android p-5">
+    <form action={action} onSubmit={handleSubmit} className="soft-card rounded-android p-5">
       <div className="flex items-center gap-2">
         <ImagePlus className="size-5 text-coral" />
         <h2 className="text-lg font-black text-ink">添加照片</h2>
@@ -23,7 +63,7 @@ export function CreatePhotoForm() {
         <label className="block sm:col-span-2">
           <span className="mb-2 block text-sm font-bold text-rosewood">照片文件</span>
           <input className="field file:mr-3 file:rounded-full file:border-0 file:bg-blush/25 file:px-4 file:py-2 file:text-sm file:font-bold file:text-rosewood" type="file" name="photo" accept="image/*" required />
-          <span className="mt-2 block text-xs font-bold text-rosewood/60">建议上传 4MB 以内的 JPG / PNG / WebP 图片。</span>
+          <span className="mt-2 block text-xs font-bold text-rosewood/60">大图会在上传前自动压缩到 4MB 以内。</span>
         </label>
         <label className="block">
           <span className="mb-2 block text-sm font-bold text-rosewood">标题</span>
@@ -55,7 +95,10 @@ export function CreatePhotoForm() {
           {state.message}
         </p>
       ) : null}
-      <SubmitButton className="primary-button mt-5 w-full">上传并保存照片</SubmitButton>
+      {compressionMessage ? <p className="mt-4 rounded-2xl bg-blush/16 px-4 py-3 text-sm font-bold text-rosewood">{compressionMessage}</p> : null}
+      <SubmitButton className="primary-button mt-5 w-full" disabled={isCompressing}>
+        {isCompressing ? "正在压缩图片..." : "上传并保存照片"}
+      </SubmitButton>
     </form>
   );
 }
