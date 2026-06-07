@@ -1,9 +1,9 @@
-"use server";
+﻿"use server";
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { z } from "zod";
-import { loginAdmin, logoutAdmin, requireAdmin } from "@/lib/auth";
+import { getCurrentAdminEmail, loginAdmin, logoutAdmin } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { removePhotoFile, uploadPhotoFile } from "@/lib/supabase";
 
@@ -27,6 +27,16 @@ function parseDate(value: string) {
     throw new Error("日期格式不正确。");
   }
   return date;
+}
+
+async function requireAdminAction() {
+  const email = await getCurrentAdminEmail();
+
+  if (!email) {
+    throw new Error("登录已过期，请重新登录后再操作。");
+  }
+
+  return email;
 }
 
 const photoSchema = z.object({
@@ -101,7 +111,7 @@ export async function logoutAction() {
 export async function createPhotoAction(_previousState: ActionState = emptyState, formData: FormData): Promise<ActionState> {
   void _previousState;
   try {
-    await requireAdmin();
+    await requireAdminAction();
     const parsed = photoSchema.parse({
       title: getString(formData, "title"),
       description: getString(formData, "description") || undefined,
@@ -152,7 +162,7 @@ export async function createPhotoAction(_previousState: ActionState = emptyState
 
 export async function updatePhotoAction(id: string, formData: FormData) {
   try {
-    await requireAdmin();
+    await requireAdminAction();
     const parsed = photoSchema.parse({
       title: getString(formData, "title"),
       description: getString(formData, "description") || undefined,
@@ -184,7 +194,7 @@ export async function updatePhotoAction(id: string, formData: FormData) {
 
 export async function deletePhotoAction(id: string) {
   try {
-    await requireAdmin();
+    await requireAdminAction();
     const photo = await prisma.photo.findUnique({ where: { id } });
     if (!photo) {
       return;
@@ -204,7 +214,7 @@ export async function deletePhotoAction(id: string) {
 
 export async function deletePhotosAction(formData: FormData) {
   try {
-    await requireAdmin();
+    await requireAdminAction();
     const ids = formData
       .getAll("photoIds")
       .map((value) => String(value))
@@ -252,7 +262,7 @@ export async function deletePhotosAction(formData: FormData) {
 export async function createTimelineAction(_previousState: ActionState = emptyState, formData: FormData): Promise<ActionState> {
   void _previousState;
   try {
-    await requireAdmin();
+    await requireAdminAction();
     const parsed = timelineSchema.parse({
       title: getString(formData, "title"),
       body: getString(formData, "body"),
@@ -288,7 +298,7 @@ export async function createTimelineAction(_previousState: ActionState = emptySt
 }
 
 export async function deleteTimelineAction(id: string) {
-  await requireAdmin();
+  await requireAdminAction();
   await prisma.timelineEvent.delete({ where: { id } });
   revalidatePath("/");
   revalidatePath("/timeline");
@@ -297,7 +307,7 @@ export async function deleteTimelineAction(id: string) {
 
 export async function updateTimelineAction(id: string, formData: FormData) {
   try {
-    await requireAdmin();
+    await requireAdminAction();
     const parsed = timelineSchema.parse({
       title: getString(formData, "title"),
       body: getString(formData, "body"),
@@ -356,7 +366,7 @@ export async function createPhotoCommentAction(
 }
 
 export async function deletePhotoCommentAction(id: string) {
-  await requireAdmin();
+  await requireAdminAction();
   await prisma.photoComment.delete({ where: { id } });
   revalidatePath("/album");
   revalidatePath("/admin");
@@ -393,14 +403,14 @@ export async function createGuestbookMessageAction(
 }
 
 export async function deleteGuestbookMessageAction(id: string) {
-  await requireAdmin();
+  await requireAdminAction();
   await prisma.guestbookMessage.delete({ where: { id } });
   revalidatePath("/guestbook");
   revalidatePath("/admin");
 }
 
 export async function toggleGuestbookPinAction(id: string, isPinned: boolean) {
-  await requireAdmin();
+  await requireAdminAction();
   await prisma.guestbookMessage.update({
     where: { id },
     data: { isPinned }
@@ -415,7 +425,7 @@ export async function createMomentPostAction(
 ): Promise<ActionState> {
   void _previousState;
   try {
-    await requireAdmin();
+    await requireAdminAction();
     const parsed = momentSchema.parse({
       title: getString(formData, "title"),
       body: getString(formData, "body"),
@@ -504,7 +514,7 @@ export async function createMomentPostAction(
 }
 
 export async function deleteMomentPostAction(id: string) {
-  await requireAdmin();
+  await requireAdminAction();
   const post = await prisma.momentPost.findUnique({
     where: { id },
     include: { photos: true }
