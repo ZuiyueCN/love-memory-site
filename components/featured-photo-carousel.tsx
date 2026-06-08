@@ -2,6 +2,7 @@
 
 /* eslint-disable @next/next/no-img-element */
 
+import { useEffect, useRef, useState } from "react";
 import { MapPin, Star } from "lucide-react";
 import { PreviewLink } from "@/components/preview-link";
 
@@ -26,14 +27,59 @@ function formatDate(value: string) {
 
 export function FeaturedPhotoCarousel({ photos }: { photos: FeaturedPhoto[] }) {
   const shouldAnimate = photos.length > 1;
+  const scrollerRef = useRef<HTMLDivElement>(null);
+  const [isInteracting, setIsInteracting] = useState(false);
+
+  useEffect(() => {
+    const scroller = scrollerRef.current;
+
+    if (!scroller || !shouldAnimate) {
+      return;
+    }
+
+    let frameId = 0;
+    let lastTime = performance.now();
+    const speed = 42;
+
+    function animate(time: number) {
+      const delta = time - lastTime;
+      lastTime = time;
+
+      if (!isInteracting && scroller.scrollWidth > scroller.clientWidth) {
+        scroller.scrollLeft += (speed * delta) / 1000;
+
+        if (scroller.scrollLeft >= scroller.scrollWidth / 2) {
+          scroller.scrollLeft -= scroller.scrollWidth / 2;
+        }
+      }
+
+      frameId = requestAnimationFrame(animate);
+    }
+
+    frameId = requestAnimationFrame(animate);
+
+    return () => {
+      cancelAnimationFrame(frameId);
+    };
+  }, [isInteracting, shouldAnimate]);
 
   return (
     <div className="featured-marquee group relative mt-8 overflow-hidden rounded-[34px] border border-white/72 bg-white/46 py-5 shadow-soft backdrop-blur-xl">
       <div className="pointer-events-none absolute inset-y-0 left-0 z-10 w-16 bg-gradient-to-r from-cream/95 to-transparent" />
       <div className="pointer-events-none absolute inset-y-0 right-0 z-10 w-16 bg-gradient-to-l from-cream/95 to-transparent" />
 
-      <div className="px-5 sm:px-8">
-        <div className={shouldAnimate ? "featured-marquee-track flex w-max" : "flex w-max"}>
+      <div
+        ref={scrollerRef}
+        className="no-scrollbar overflow-x-auto px-5 sm:px-8"
+        onMouseEnter={() => setIsInteracting(true)}
+        onMouseLeave={() => setIsInteracting(false)}
+        onPointerDown={() => setIsInteracting(true)}
+        onPointerUp={() => setIsInteracting(false)}
+        onPointerCancel={() => setIsInteracting(false)}
+        onTouchStart={() => setIsInteracting(true)}
+        onTouchEnd={() => setIsInteracting(false)}
+      >
+        <div className="flex w-max">
           <FeaturedPhotoSet photos={photos} />
           {shouldAnimate ? <FeaturedPhotoSet photos={photos} ariaHidden /> : null}
         </div>

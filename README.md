@@ -11,6 +11,8 @@
 - 留言板：访客可以留言，主人可在后台置顶或删除。
 - 登录系统：只允许环境变量中配置的主人邮箱登录。
 - 管理后台：上传照片，新增、编辑、删除照片、时间线、组图动态、评论和留言。
+- 上传体验：选择照片后自动识别 EXIF 拍摄日期，大图会自动压缩并转成普通 JPG。
+- 背景音乐：支持全站悬浮播放按钮，默认读取 `/music/background.mp3`。
 - 图片存储：使用 Supabase Storage。
 - 数据库：使用 Supabase Postgres + Prisma。
 
@@ -39,6 +41,7 @@ ADMIN_EMAIL="你的主人邮箱"
 ADMIN_INITIAL_PASSWORD="你的初始密码"
 SESSION_SECRET="至少 32 位随机字符串"
 AUTH_COOKIE_SECURE="本地或 HTTP 公网 IP 填 false，HTTPS 域名填 true"
+NEXT_PUBLIC_BACKGROUND_MUSIC_URL="/music/background.mp3"
 ```
 
 4. 在 Supabase Storage 创建公开 bucket，名称与 `SUPABASE_STORAGE_BUCKET` 保持一致，默认是 `love-photos`。
@@ -99,6 +102,7 @@ ADMIN_EMAIL="你的主人邮箱"
 ADMIN_INITIAL_PASSWORD="你的初始密码"
 SESSION_SECRET="至少 32 位随机字符串"
 AUTH_COOKIE_SECURE="本地或 HTTP 公网 IP 填 false，HTTPS 域名填 true"
+NEXT_PUBLIC_BACKGROUND_MUSIC_URL="/music/background.mp3"
 ```
 
 Vercel 构建设置保持默认即可：

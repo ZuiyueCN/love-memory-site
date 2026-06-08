@@ -4,6 +4,7 @@ import { type FormEvent, useActionState, useState } from "react";
 import { ImagePlus } from "lucide-react";
 import { createPhotoAction } from "@/app/actions";
 import { compressImageFile } from "@/components/forms/image-compression";
+import { readPhotoTakenDate } from "@/components/forms/photo-date";
 import { SubmitButton } from "@/components/forms/submit-button";
 
 const initialState = {
@@ -14,7 +15,33 @@ const initialState = {
 export function CreatePhotoForm() {
   const [state, action] = useActionState(createPhotoAction, initialState);
   const [compressionMessage, setCompressionMessage] = useState("");
+  const [dateMessage, setDateMessage] = useState("");
   const [isCompressing, setIsCompressing] = useState(false);
+
+  async function handlePhotoChange(event: FormEvent<HTMLInputElement>) {
+    const input = event.currentTarget;
+    const file = input.files?.[0];
+
+    if (!file) {
+      return;
+    }
+
+    const form = input.form;
+    const dateInput = form?.elements.namedItem("takenAt");
+
+    if (!(dateInput instanceof HTMLInputElement)) {
+      return;
+    }
+
+    const takenDate = await readPhotoTakenDate(file);
+
+    if (takenDate) {
+      dateInput.value = takenDate;
+      setDateMessage(`已自动识别拍摄日期：${takenDate}`);
+    } else {
+      setDateMessage("没有读到照片拍摄日期，可以手动选择。");
+    }
+  }
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     const form = event.currentTarget;
@@ -62,8 +89,16 @@ export function CreatePhotoForm() {
       <div className="mt-5 grid gap-4 sm:grid-cols-2">
         <label className="block sm:col-span-2">
           <span className="mb-2 block text-sm font-bold text-rosewood">照片文件</span>
-          <input className="field file:mr-3 file:rounded-full file:border-0 file:bg-blush/25 file:px-4 file:py-2 file:text-sm file:font-bold file:text-rosewood" type="file" name="photo" accept="image/*" required />
+          <input
+            className="field file:mr-3 file:rounded-full file:border-0 file:bg-blush/25 file:px-4 file:py-2 file:text-sm file:font-bold file:text-rosewood"
+            type="file"
+            name="photo"
+            accept="image/*"
+            onChange={handlePhotoChange}
+            required
+          />
           <span className="mt-2 block text-xs font-bold text-rosewood/60">照片会在上传前自动转成普通 JPG，大图会压缩到 4MB 以内，避免 HDR 闪烁。</span>
+          {dateMessage ? <span className="mt-2 block text-xs font-black text-coral">{dateMessage}</span> : null}
         </label>
         <label className="block">
           <span className="mb-2 block text-sm font-bold text-rosewood">标题</span>

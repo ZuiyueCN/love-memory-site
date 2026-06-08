@@ -4,6 +4,7 @@ import { type FormEvent, useActionState, useState } from "react";
 import { Images } from "lucide-react";
 import { createMomentPostAction } from "@/app/actions";
 import { compressImageFiles } from "@/components/forms/image-compression";
+import { readPhotoTakenDate } from "@/components/forms/photo-date";
 import { SubmitButton } from "@/components/forms/submit-button";
 
 const initialState = {
@@ -14,7 +15,33 @@ const initialState = {
 export function CreateMomentForm() {
   const [state, action] = useActionState(createMomentPostAction, initialState);
   const [compressionMessage, setCompressionMessage] = useState("");
+  const [dateMessage, setDateMessage] = useState("");
   const [isCompressing, setIsCompressing] = useState(false);
+
+  async function handlePhotosChange(event: FormEvent<HTMLInputElement>) {
+    const input = event.currentTarget;
+    const file = input.files?.[0];
+
+    if (!file) {
+      return;
+    }
+
+    const form = input.form;
+    const dateInput = form?.elements.namedItem("postedAt");
+
+    if (!(dateInput instanceof HTMLInputElement)) {
+      return;
+    }
+
+    const takenDate = await readPhotoTakenDate(file);
+
+    if (takenDate) {
+      dateInput.value = takenDate;
+      setDateMessage(`已根据第一张照片识别日期：${takenDate}`);
+    } else {
+      setDateMessage("没有读到照片拍摄日期，可以手动选择。");
+    }
+  }
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     const form = event.currentTarget;
@@ -72,9 +99,11 @@ export function CreateMomentForm() {
             name="photos"
             accept="image/*"
             multiple
+            onChange={handlePhotosChange}
             required
           />
           <span className="mt-2 block text-xs font-bold text-rosewood/60">最多 9 张，照片会在上传前自动转成普通 JPG，大图会压缩到每张 4MB 以内，避免 HDR 闪烁。</span>
+          {dateMessage ? <span className="mt-2 block text-xs font-black text-coral">{dateMessage}</span> : null}
         </label>
         <label className="block">
           <span className="mb-2 block text-sm font-bold text-rosewood">标题</span>
