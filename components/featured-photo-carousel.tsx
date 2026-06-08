@@ -31,9 +31,7 @@ export function FeaturedPhotoCarousel({ photos }: { photos: FeaturedPhoto[] }) {
   const [isInteracting, setIsInteracting] = useState(false);
 
   useEffect(() => {
-    const scroller = scrollerRef.current;
-
-    if (!scroller || !shouldAnimate) {
+    if (!scrollerRef.current || !shouldAnimate) {
       return;
     }
 
@@ -42,6 +40,12 @@ export function FeaturedPhotoCarousel({ photos }: { photos: FeaturedPhoto[] }) {
     const speed = 42;
 
     function animate(time: number) {
+      const scroller = scrollerRef.current;
+
+      if (!scroller) {
+        return;
+      }
+
       const delta = time - lastTime;
       lastTime = time;
 
