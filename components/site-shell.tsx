@@ -1,6 +1,5 @@
 import Link from "next/link";
 import { CalendarHeart, Camera, Heart, Home, Images, LockKeyhole, MessageCircleHeart, Sparkles } from "lucide-react";
-import { BackgroundMusicPlayer } from "@/components/background-music-player";
 import { getCurrentAdminEmail } from "@/lib/auth";
 import { RestoreScroll } from "@/components/restore-scroll";
 import { ScrollProgress } from "@/components/scroll-progress";
@@ -15,13 +14,11 @@ const navItems = [
 
 export async function SiteShell({ children }: { children: React.ReactNode }) {
   const adminEmail = await getCurrentAdminEmail();
-  const musicUrl = process.env.NEXT_PUBLIC_BACKGROUND_MUSIC_URL || "/music/background.mp3";
 
   return (
     <div className="relative min-h-screen overflow-hidden pb-24 md:pb-8">
       <RestoreScroll />
       <ScrollProgress />
-      <BackgroundMusicPlayer src={musicUrl} />
       <div className="ambient-layer" aria-hidden="true" />
       <header className="sticky top-0 z-40 border-b border-white/50 bg-cream/72 backdrop-blur-2xl">
         <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-3 sm:px-6 lg:px-8">

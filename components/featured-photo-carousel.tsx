@@ -2,7 +2,7 @@
 
 /* eslint-disable @next/next/no-img-element */
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 import { MapPin, Star } from "lucide-react";
 import { PreviewLink } from "@/components/preview-link";
 
@@ -28,7 +28,7 @@ function formatDate(value: string) {
 export function FeaturedPhotoCarousel({ photos }: { photos: FeaturedPhoto[] }) {
   const shouldAnimate = photos.length > 1;
   const scrollerRef = useRef<HTMLDivElement>(null);
-  const [isInteracting, setIsInteracting] = useState(false);
+  const pauseUntilRef = useRef(0);
 
   useEffect(() => {
     if (!scrollerRef.current || !shouldAnimate) {
@@ -37,7 +37,7 @@ export function FeaturedPhotoCarousel({ photos }: { photos: FeaturedPhoto[] }) {
 
     let frameId = 0;
     let lastTime = performance.now();
-    const speed = 42;
+    const speed = 70;
 
     function animate(time: number) {
       const scroller = scrollerRef.current;
@@ -49,7 +49,7 @@ export function FeaturedPhotoCarousel({ photos }: { photos: FeaturedPhoto[] }) {
       const delta = time - lastTime;
       lastTime = time;
 
-      if (!isInteracting && scroller.scrollWidth > scroller.clientWidth) {
+      if (time >= pauseUntilRef.current && scroller.scrollWidth > scroller.clientWidth) {
         scroller.scrollLeft += (speed * delta) / 1000;
 
         if (scroller.scrollLeft >= scroller.scrollWidth / 2) {
@@ -65,7 +65,11 @@ export function FeaturedPhotoCarousel({ photos }: { photos: FeaturedPhoto[] }) {
     return () => {
       cancelAnimationFrame(frameId);
     };
-  }, [isInteracting, shouldAnimate]);
+  }, [shouldAnimate]);
+
+  function pauseBriefly() {
+    pauseUntilRef.current = performance.now() + 1500;
+  }
 
   return (
     <div className="featured-marquee group relative mt-8 overflow-hidden rounded-[34px] border border-white/72 bg-white/46 py-5 shadow-soft backdrop-blur-xl">
@@ -75,13 +79,10 @@ export function FeaturedPhotoCarousel({ photos }: { photos: FeaturedPhoto[] }) {
       <div
         ref={scrollerRef}
         className="no-scrollbar overflow-x-auto px-5 sm:px-8"
-        onMouseEnter={() => setIsInteracting(true)}
-        onMouseLeave={() => setIsInteracting(false)}
-        onPointerDown={() => setIsInteracting(true)}
-        onPointerUp={() => setIsInteracting(false)}
-        onPointerCancel={() => setIsInteracting(false)}
-        onTouchStart={() => setIsInteracting(true)}
-        onTouchEnd={() => setIsInteracting(false)}
+        onPointerDown={pauseBriefly}
+        onPointerMove={pauseBriefly}
+        onWheel={pauseBriefly}
+        onTouchMove={pauseBriefly}
       >
         <div className="flex w-max">
           <FeaturedPhotoSet photos={photos} />
